@@ -1,0 +1,7 @@
+{
+  "name": "E-Persuratan Digital",
+  "description": "Platform persuratan otomatis dengan penomoran cerdas, tanda tangan QR Code, dan verifikasi dokumen digital.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
