@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { FileText, Send, CheckCircle, Clock, Archive as ArchiveIcon, Plus, Hash, X, Info, User, AlignLeft, Sparkles, Loader2 } from 'lucide-react';
+import { FileText, Send, CheckCircle, Clock, Archive as ArchiveIcon, Plus, Hash, X, Info, User, AlignLeft, Sparkles, Loader2, Copy, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getLetters, saveLetter, getNextNumber } from '../services/letterStore';
 import { getCurrentUser } from '../services/userStore';
@@ -18,14 +18,14 @@ const Dashboard: React.FC = () => {
   const [dynamicTemplates, setDynamicTemplates] = useState(getLetterTemplates());
 
   const [showQuickNumber, setShowQuickNumber] = useState(false);
-  const [selectedType, setSelectedType] = useState<LetterType>(dynamicTemplates[0]?.id || LetterType.SU);
+  const [selectedType, setSelectedType] = useState<string>(dynamicTemplates[0]?.id || '01');
   const [selectedDiv, setSelectedDiv] = useState(dynamicDivs[0]?.code || 'DIV');
   
-  // Mandatory Quick Number Fields
   const [quickTitle, setQuickTitle] = useState('');
   const [quickRecipient, setQuickRecipient] = useState('');
   const [quickContent, setQuickContent] = useState('');
   const [loadingAI, setLoadingAI] = useState(false);
+  const [copied, setCopied] = useState(false);
   
   const [generatedNumber, setGeneratedNumber] = useState<string | null>(null);
 
@@ -45,31 +45,34 @@ const Dashboard: React.FC = () => {
     setLoadingAI(false);
   };
 
-  const handleGetNumber = () => {
-    if (!quickTitle.trim() || !quickRecipient.trim() || !quickContent.trim()) {
-      alert("Harap lengkapi Perihal, Tujuan Penerima, dan Konteks Surat.");
-      return;
+  const handleCopyNumber = () => {
+    if (generatedNumber) {
+      navigator.clipboard.writeText(generatedNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
+  };
 
+  const handleGetNumber = () => {
     const num = getNextNumber(selectedType, selectedDiv);
     setGeneratedNumber(num);
     
     const newRecord: Letter = {
       id: Math.random().toString(36).substr(2, 9),
       number: num,
-      type: selectedType,
+      type: selectedType as LetterType,
       divisionCode: selectedDiv,
-      title: quickTitle,
+      title: quickTitle.trim() || `(Reservasi Nomor - ${selectedType})`,
       date: new Date().toISOString().split('T')[0],
       sender: ORG_NAME,
-      recipient: quickRecipient,
-      content: quickContent,
+      recipient: quickRecipient.trim() || "(Penerima Belum Ditentukan)",
+      content: quickContent.trim() || "Nomor ini telah direservasi melalui sistem Ambil Nomor Cepat.",
       attachmentCount: 0,
       signedBy: DEFAULT_SIGNER,
       signedRole: DEFAULT_ROLE,
       qrCodeUrl: '', 
       createdAt: new Date().toISOString(),
-      isNumberOnly: false 
+      isNumberOnly: quickContent.trim() === ''
     };
     saveLetter(newRecord);
   };
@@ -80,6 +83,7 @@ const Dashboard: React.FC = () => {
     setQuickTitle('');
     setQuickRecipient('');
     setQuickContent('');
+    setCopied(false);
   };
 
   const stats = [
@@ -98,7 +102,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Quick Number Modal (Close button included) */}
+      {/* Quick Number Modal */}
       {showQuickNumber && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 md:p-6 overflow-y-auto">
           <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in duration-300 my-auto">
@@ -107,7 +111,10 @@ const Dashboard: React.FC = () => {
                 <div className="p-3 bg-orange-600 text-white rounded-2xl shadow-lg shadow-orange-600/20">
                   <Hash size={24} />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Reservasi Nomor Cepat</h3>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Ambil Nomor Cepat</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gunakan untuk reservasi nomor secara instan</p>
+                </div>
               </div>
               <button onClick={resetQuickForm} className="p-2.5 bg-white border border-slate-200 text-slate-400 hover:text-slate-900 rounded-xl transition-all shadow-sm">
                 <X size={20} />
@@ -125,9 +132,9 @@ const Dashboard: React.FC = () => {
                       <select 
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all text-sm"
                         value={selectedType}
-                        onChange={(e) => setSelectedType(e.target.value as LetterType)}
+                        onChange={(e) => setSelectedType(e.target.value)}
                       >
-                        {dynamicTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                        {dynamicTemplates.map(t => <option key={t.id} value={t.id}>{t.name} ({t.id})</option>)}
                       </select>
                     </div>
                     <div className="space-y-2">
@@ -146,7 +153,7 @@ const Dashboard: React.FC = () => {
 
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                      <AlignLeft size={12} /> Perihal Surat
+                      <AlignLeft size={12} /> Perihal <span className="text-slate-300 font-normal ml-1">(Opsional)</span>
                     </label>
                     <input 
                       type="text"
@@ -159,7 +166,7 @@ const Dashboard: React.FC = () => {
 
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                      <User size={12} /> Tujuan Penerima
+                      <User size={12} /> Tujuan <span className="text-slate-300 font-normal ml-1">(Opsional)</span>
                     </label>
                     <input 
                       type="text"
@@ -170,33 +177,16 @@ const Dashboard: React.FC = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-                        <FileText size={12} /> Konteks Surat
-                      </label>
-                      <button 
-                        onClick={handleAIComposeQuick}
-                        disabled={loadingAI}
-                        className="text-[10px] font-black text-orange-600 uppercase flex items-center gap-1.5 hover:bg-orange-50 px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
-                      >
-                        {loadingAI ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                        {loadingAI ? 'Merumuskan...' : 'Gunakan AI'}
-                      </button>
-                    </div>
-                    <textarea 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 transition-all text-sm min-h-[140px] leading-relaxed"
-                      placeholder="Tuliskan isi atau konteks singkat dari surat ini..."
-                      value={quickContent}
-                      onChange={(e) => setQuickContent(e.target.value)}
-                    />
+                  <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex items-start gap-3">
+                    <Info size={18} className="text-blue-600 mt-0.5" />
+                    <p className="text-[11px] text-blue-800 leading-relaxed">Penerbitan nomor instan. Anda dapat melengkapi konten surat nanti melalui menu Arsip Surat.</p>
                   </div>
 
                   <button 
                     onClick={handleGetNumber}
-                    className="w-full py-5 bg-orange-600 text-white font-black rounded-[20px] shadow-xl shadow-orange-600/20 hover:bg-orange-700 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2"
+                    className="w-full py-5 bg-slate-900 text-white font-black rounded-[20px] shadow-xl hover:bg-orange-600 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2"
                   >
-                    <CheckCircle size={18} /> Terbitkan & Simpan Arsip
+                    <CheckCircle size={18} /> Terbitkan Nomor Sekarang
                   </button>
                 </div>
               ) : (
@@ -204,22 +194,32 @@ const Dashboard: React.FC = () => {
                   <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-2 animate-bounce">
                     <CheckCircle size={48} />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Nomor Surat Berhasil Terbit</p>
-                    <h4 className="text-3xl font-black text-slate-900 font-mono tracking-tight break-all border-y border-slate-100 py-6">{generatedNumber}</h4>
+                    <div className="relative group">
+                      <h4 className="text-3xl font-black text-slate-900 font-mono tracking-tight break-all border-y border-slate-100 py-8 px-4 bg-slate-50/50">
+                        {generatedNumber}
+                      </h4>
+                      <button 
+                        onClick={handleCopyNumber}
+                        className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-xl transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest ${copied ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-slate-400 hover:text-orange-600 shadow-sm border border-slate-200'}`}
+                      >
+                        {copied ? <><Check size={16} /> Tersalin</> : <><Copy size={16} /> Salin Nomor</>}
+                      </button>
+                    </div>
                   </div>
                   <div className="flex flex-col md:flex-row gap-4">
                     <button 
                       onClick={resetQuickForm}
-                      className="flex-1 py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl hover:bg-slate-800 transition-all uppercase tracking-widest text-[10px]"
+                      className="flex-1 py-4 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-200 transition-all uppercase tracking-widest text-[10px]"
                     >
-                      Tutup
+                      Selesai
                     </button>
                     <Link 
                       to="/archive"
-                      className="flex-1 py-4 bg-white border border-slate-200 text-slate-900 font-black rounded-2xl shadow-sm hover:bg-slate-50 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                      className="flex-1 py-4 bg-orange-600 text-white font-black rounded-2xl shadow-xl shadow-orange-600/20 hover:bg-orange-700 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
                     >
-                      Lihat di Arsip <Plus size={14} />
+                      Buka Arsip <Plus size={14} />
                     </Link>
                   </div>
                 </div>

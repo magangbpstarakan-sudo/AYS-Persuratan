@@ -49,6 +49,11 @@ export const COPYRIGHT_YEAR = "2026";
 export const LEGAL_DISCLAIMER = "Dokumen ini diterbitkan secara elektronik melalui sistem administrasi resmi AYS Indonesia. Keaslian dokumen dapat divalidasi dengan memindai QR Code yang tertera. Penggunaan tanpa hak atas dokumen ini dapat dikenakan sanksi sesuai UU ITE yang berlaku.";
 
 /** 
+ * PORTAL URL (User Provided)
+ */
+export const PUBLIC_PORTAL_URL = "https://aistudio.google.com/apps/drive/1iRYMxheb_qpCLToqXijmjnPiIgk-MAP5?showAssistant=true&showPreview=true";
+
+/** 
  * PERMANENT BRANDING ASSETS (Official direct links provided)
  */
 export const DEFAULT_HEADER_SVG = `https://i.ibb.co.com/Fb7RyYgm/Header.png`;

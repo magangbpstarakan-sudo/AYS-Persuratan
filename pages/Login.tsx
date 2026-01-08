@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, User, FileText, AlertCircle, ArrowRight, ArrowLeft, Globe } from 'lucide-react';
-import { ORG_NAME, COPYRIGHT_YEAR, APP_NAME } from '../constants';
+import { Lock, User, FileText, AlertCircle, ArrowRight, Globe } from 'lucide-react';
+import { ORG_NAME, COPYRIGHT_YEAR, APP_NAME, PUBLIC_PORTAL_URL } from '../constants';
 import { getUsers } from '../services/userStore';
 
 const Login: React.FC = () => {
@@ -29,9 +29,14 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="flex justify-between items-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-orange-500 transition-all font-black text-[10px] uppercase tracking-widest">
+          <a 
+            href={PUBLIC_PORTAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-slate-500 hover:text-orange-500 transition-all font-black text-[10px] uppercase tracking-widest"
+          >
             <Globe size={14} /> Ke Portal Publik
-          </Link>
+          </a>
           <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest">Secure Access</p>
         </div>
 

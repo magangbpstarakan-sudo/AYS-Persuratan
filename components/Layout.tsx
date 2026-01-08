@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, PlusCircle, FileText, Menu, X, LogOut, Settings, Users, Database, Globe } from 'lucide-react';
-import { APP_NAME, COPYRIGHT_YEAR } from '../constants';
+import { APP_NAME, COPYRIGHT_YEAR, PUBLIC_PORTAL_URL } from '../constants';
 import { getCurrentUser } from '../services/userStore';
 import { UserRole } from '../types';
 
@@ -59,13 +59,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </nav>
         
         <div className="p-4 mt-auto space-y-2">
-          <Link 
-            to="/" 
+          <a 
+            href={PUBLIC_PORTAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full flex items-center gap-3 px-4 py-3 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-xl transition-all font-medium text-sm"
           >
             <Globe size={18} />
             <span>Portal Publik</span>
-          </Link>
+          </a>
           <button 
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all font-medium text-sm"
@@ -95,9 +97,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </h2>
           </div>
           <div className="flex items-center gap-6">
-            <Link to="/" className="hidden sm:flex items-center gap-2 text-slate-400 hover:text-orange-600 transition-all text-xs font-bold uppercase tracking-widest">
+            <a 
+              href={PUBLIC_PORTAL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:flex items-center gap-2 text-slate-400 hover:text-orange-600 transition-all text-xs font-bold uppercase tracking-widest"
+            >
                <Globe size={16} /> Portal Publik
-            </Link>
+            </a>
             <div className="h-6 w-px bg-slate-100 hidden sm:block"></div>
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
